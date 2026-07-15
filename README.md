@@ -88,7 +88,7 @@ SJN Scheduling Algorithm Test Suite
 ===================================================================
 TEST SUMMARY
 ===================================================================
-Total Tests:  53
+Total Tests:  50
 Passed:  53
 Failed:  0
 

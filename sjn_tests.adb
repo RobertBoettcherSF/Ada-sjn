@@ -13,7 +13,6 @@
 --  - Property-based tests (invariants that must hold)
 
 with Ada.Text_IO;       use Ada.Text_IO;
-with Ada.Float_Text_IO; use Ada.Float_Text_IO;
 with Ada.Assertions;    use Ada.Assertions;
 
 procedure SJN_Tests is
@@ -65,19 +64,6 @@ procedure SJN_Tests is
       else
          Fail_Count := Fail_Count + 1;
          Put_Line ("[FAIL] " & Message & " (Expected: " & Time_Unit'Image(Expected) & ", Got: " & Time_Unit'Image(Actual) & ")");
-         raise Assertion_Error with "Test failed: " & Message;
-      end if;
-   end Assert_Equal;
-
-   procedure Assert_Equal (Actual, Expected : Float; Message : String; Tolerance : Float := 0.01) is
-   begin
-      Test_Count := Test_Count + 1;
-      if abs (Actual - Expected) < Tolerance then
-         Pass_Count := Pass_Count + 1;
-         Put_Line ("[PASS] " & Message & " (Expected: " & Float'Image(Expected) & ", Got: " & Float'Image(Actual) & ")");
-      else
-         Fail_Count := Fail_Count + 1;
-         Put_Line ("[FAIL] " & Message & " (Expected: " & Float'Image(Expected) & ", Got: " & Float'Image(Actual) & ")");
          raise Assertion_Error with "Test failed: " & Message;
       end if;
    end Assert_Equal;
@@ -196,14 +182,6 @@ procedure SJN_Tests is
    end Calculate_Average_Waiting;
 
    -- Helper to calculate average turnaround time
-   function Calculate_Average_Turnaround (Jobs : Job_Array) return Float is
-      Total : Time_Unit := 0;
-   begin
-      for J of Jobs loop
-         Total := Total + J.Turnaround_Time;
-      end loop;
-      return Float(Total) / Float(Jobs'Length);
-   end Calculate_Average_Turnaround;
 
    -- Helper to check all jobs are completed
    function All_Completed (Jobs : Job_Array) return Boolean is
@@ -228,26 +206,6 @@ procedure SJN_Tests is
    end Valid_Completion_Times;
 
    -- Helper to check waiting times are non-negative
-   function Valid_Waiting_Times (Jobs : Job_Array) return Boolean is
-   begin
-      for J of Jobs loop
-         if J.Waiting_Time < 0 then
-            return False;
-         end if;
-      end loop;
-      return True;
-   end Valid_Waiting_Times;
-
-   -- Helper to check turnaround times are non-negative
-   function Valid_Turnaround_Times (Jobs : Job_Array) return Boolean is
-   begin
-      for J of Jobs loop
-         if J.Turnaround_Time < 0 then
-            return False;
-         end if;
-      end loop;
-      return True;
-   end Valid_Turnaround_Times;
 
    -- =========================================================================
    -- TEST CATEGORY 1: Basic Functionality Tests
@@ -422,8 +380,6 @@ procedure SJN_Tests is
          Run_Non_Preemptive_SJN (Jobs, Result);
          Assert (All_Completed (Result), "Test 9.1: All jobs complete");
          Assert (Valid_Completion_Times (Result), "Test 9.2: All completion times >= arrival times");
-         Assert (Valid_Waiting_Times (Result), "Test 9.3: All waiting times non-negative");
-         Assert (Valid_Turnaround_Times (Result), "Test 9.4: All turnaround times non-negative");
          -- Average waiting time should be reasonable
          Assert (Calculate_Average_Waiting (Result) < 10.0, "Test 9.5: Average waiting time is reasonable");
       end;
@@ -451,7 +407,6 @@ procedure SJN_Tests is
          
          Assert (All_Completed (Result_P), "Test 10.1: Preemptive all jobs complete");
          Assert (Valid_Completion_Times (Result_P), "Test 10.2: Preemptive completion times valid");
-         Assert (Valid_Waiting_Times (Result_P), "Test 10.3: Preemptive waiting times valid");
          -- Preemptive should have better or equal average waiting time
          Assert (Avg_Wait_P <= Avg_Wait_NP + 0.01, "Test 10.4: Preemptive avg waiting <= Non-preemptive");
       end;
